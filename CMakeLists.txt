@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(hydrogen LANGUAGES C)
+project(hydrogen LANGUAGES C CXX)
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
@@ -16,6 +16,7 @@ endfunction()
 
 set(source_files
         "${PROJECT_NAME}.c"
+        "pw.cpp"
         "impl/common.h"
         "impl/core.h"
         "impl/gimli-core.h"

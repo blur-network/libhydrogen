@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef hydrogen_H
 #define hydrogen_H
 
@@ -314,4 +318,8 @@ int hydro_unpad(const unsigned char *buf, size_t padded_buflen, size_t blocksize
 }
 #endif
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
