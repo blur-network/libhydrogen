@@ -5,10 +5,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <list>
+#include <termios.h>
+#include <unistd.h>
 
 #include <iostream>
 #include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
 
@@ -20,6 +21,40 @@
 #define THREADS_MAX 1
 #define OPSLIMIT_MAX 50000
 
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <termios.h>
+#include <unistd.h>
+#endif
+
+/* Disable echo function from: https://stackoverflow.com/questions/1413445/reading-a-password-from-stdcin */
+
+void set_echo(bool enable = true)
+{
+#ifdef WIN32
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode;
+    GetConsoleMode(hStdin, &mode);
+
+    if( !enable )
+        mode &= ~ENABLE_ECHO_INPUT;
+    else
+        mode |= ENABLE_ECHO_INPUT;
+
+    SetConsoleMode(hStdin, mode );
+
+#else
+    struct termios tty;
+    tcgetattr(STDIN_FILENO, &tty);
+    if( !enable )
+        tty.c_lflag &= ~ECHO;
+    else
+        tty.c_lflag |= ECHO;
+
+    (void) tcsetattr(STDIN_FILENO, TCSANOW, &tty);
+#endif
+}
 
 char *userinput(FILE* fp, size_t size) {
   char *in; int buf;
@@ -66,13 +101,17 @@ hydro_pwhash_keygen(new_master_key);
     char               h_hex[129]; // byte for each char + 1 null term byte
 
 printf("Enter a password for key derivation: \t");
+set_echo(false);
 
 char *in = userinput(stdin, sizeof(stdin));
   if (in == NULL) {
     hydro_memzero((void*)(stdin), sizeof(stdin));
     return -1;
   }
+printf("\n");
 const char *input = in;
+
+set_echo(true);
 
     memset(new_master_key, 'x', sizeof new_master_key);
     hydro_pwhash_deterministic(h, sizeof h, input, sizeof (input - 1), CONTEXT, new_master_key, OPSLIMIT, 0, 1);
@@ -98,6 +137,7 @@ hydro_memzero((void*)(input), sizeof(input));
 hydro_memzero((void*)(in), sizeof(in));
 
 printf("Please re-type your password to verify: \t"); // working
+set_echo(false);
 
     uint8_t            htwo[64];
     char               htwo_hex[129]; // byte for each char + 1 null term byte
@@ -105,8 +145,9 @@ printf("Please re-type your password to verify: \t"); // working
 char *intwo = userinput(stdin, sizeof(stdin));
   if (intwo == NULL)
     return -1;
+printf("\n");
 const char *inputtwo = intwo;
-
+set_echo(true);
 hydro_pwhash_deterministic(htwo, sizeof htwo, inputtwo, sizeof (inputtwo - 1), CONTEXT, new_master_key, OPSLIMIT, 0, 1);
 hydro_bin2hex(htwo_hex, sizeof htwo_hex, htwo, sizeof htwo);
 
