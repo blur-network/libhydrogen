@@ -1,3 +1,7 @@
+message(STATUS "Building libhydrogen for crypto ops and constant time stuff")
+set(HYDROGEN_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "Libhydrogen Include path")
+set(HYDROGEN_LIBRARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "Libhydrogen Library name")
+
 cmake_minimum_required(VERSION 3.12)
 
 project(hydrogen LANGUAGES C CXX)
@@ -16,7 +20,6 @@ endfunction()
 
 set(source_files
         "${PROJECT_NAME}.c"
-        "pw.cpp"
         "impl/common.h"
         "impl/core.h"
         "impl/gimli-core.h"
