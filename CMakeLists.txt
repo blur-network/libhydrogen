@@ -97,6 +97,7 @@ add_library("${PROJECT_NAME}")
 add_library("${PROJECT_NAME}::${PROJECT_NAME}" ALIAS "${PROJECT_NAME}")
 
 target_sources("${PROJECT_NAME}" PRIVATE ${project_source_files})
+set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_FLAGS "-fPIC")
 
 target_include_directories("${PROJECT_NAME}" PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
