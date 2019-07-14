@@ -5,6 +5,9 @@ project(hydrogen LANGUAGES C CXX)
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+
 string(TOUPPER "${PROJECT_NAME}" setting_prefix)
 function(get_setting setting_name setting_type setting_description)
     string(TOUPPER "${setting_prefix}_${setting_name}" setting_external_name)
@@ -16,7 +19,6 @@ endfunction()
 
 set(source_files
         "${PROJECT_NAME}.c"
-        "pw.cpp"
         "impl/common.h"
         "impl/core.h"
         "impl/gimli-core.h"
@@ -35,8 +37,10 @@ set(source_files
 set(header_files
         "${PROJECT_NAME}.h")
 
+if(BUILD_TESTS)
 set(test_files
         "tests/tests.c")
+endif()
 
 set(arduino_files
         "library.properties")
@@ -80,7 +84,11 @@ endfunction()
 
 prefix_project_paths(source_files)
 prefix_project_paths(header_files)
+
+if(BUILD_TESTS)
 prefix_project_paths(test_files)
+endif()
+
 prefix_project_paths(arduino_files)
 
 # Main library
@@ -138,6 +146,7 @@ export(PACKAGE "${PROJECT_NAME}")
 
 # Tests
 
+if(BUILD_TESTS)
 set(tests_executable "${PROJECT_NAME}-tests")
 set(tests_run_target "${PROJECT_NAME}-run-tests")
 set(tests_run_file "${PROJECT_BINARY_DIR}/${tests_run_target}.done")
@@ -168,7 +177,7 @@ else()
             WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
     add_custom_target("${tests_run_target}" ALL DEPENDS "${tests_run_file}")
 endif()
-
+endif()
 # Generate Arduino package
 
 set(arduino_package_file "${PROJECT_BINARY_DIR}/hydrogen-crypto.zip")
@@ -183,3 +192,12 @@ add_custom_command(OUTPUT "${arduino_package_file}"
 
 add_custom_target("${PROJECT_NAME}-arduino-package"
         DEPENDS "${arduino_package_file}")
+
+target_link_libraries(hydrogen)
+
+
+export(EXPORT "${targets_export_name}"
+        FILE "${targets_export_file}"
+        NAMESPACE "${PROJECT_NAME}::")
+
+export(PACKAGE "${PROJECT_NAME}")
